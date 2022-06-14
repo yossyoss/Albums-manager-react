@@ -2,7 +2,7 @@ import React from 'react';
 
 export const updateIcon = (
 	<i className='material-icons' style={{ fontSize: '20px' }}>
-		upgrade
+		update
 	</i>
 );
 

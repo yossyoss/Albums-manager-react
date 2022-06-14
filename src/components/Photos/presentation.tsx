@@ -15,21 +15,33 @@ import { loadingImageUrl } from '../../services/consts';
 import PhotoModal from '../PhotoModal';
 
 const Presentation = props => {
-	const cards = props.photos.map((photo, index) => {
+	const {
+		photos,
+		isUpdating,
+		isDeleting,
+		isLoadingAlbum,
+		onCreateFormOpen,
+		updateFormPhoto,
+		createFormShow
+	} = props
+
+	const cards = photos.map((photo, index) => {
 		const title =
-			props.isUpdating === index || props.isDeleting === index
+			isUpdating === index || isDeleting === index
 				? 'Updating ...'
 				: photo.title;
 		const url =
-			props.isUpdating === index || props.isDeleting === index
+			isUpdating === index || isDeleting === index
 				? loadingImageUrl
 				: photo.thumbnailUrl;
-		const isDisabled = props.isUpdating === index || props.isDeleting === index;
+		const isDisabled = isUpdating === index || isDeleting === index;
+
 
 		return (
 			<Card key={index}>
 				<Card.Img
 					variant='top'
+					onClick={()=>window.open(photo.url)}
 					src={url}
 					alt={`Invalid Url for Image #${photo.id}`}
 				/>
@@ -38,7 +50,7 @@ const Presentation = props => {
 					<ButtonGroup>
 						<OverlayTrigger
 							placement='bottom'
-							overlay={<Tooltip>Update the Card</Tooltip>}
+							overlay={<Tooltip id={"Tooltip"}>Update the Photo</Tooltip>}
 						>
 							<Button
 								variant='outline-info'
@@ -51,7 +63,7 @@ const Presentation = props => {
 
 						<OverlayTrigger
 							placement='bottom'
-							overlay={<Tooltip>Delete the Card</Tooltip>}
+							overlay={<Tooltip id={"Tooltip"}>Delete the Photo</Tooltip>}
 						>
 							<Button
 								variant='outline-danger'
@@ -68,7 +80,7 @@ const Presentation = props => {
 	});
 
 	let render =
-		props.isLoadingAlbum === true ? (
+		isLoadingAlbum === true ? (
 			<Alert show={true} variant='info' className='text-center'>
 				<Alert.Heading>Loading the Current Album</Alert.Heading>
 				<div>
@@ -104,23 +116,22 @@ const Presentation = props => {
 					Go back to Home
 				</Button>
 				<CardColumns>{cards}</CardColumns>
-				<Button block variant='primary' onClick={props.onCreateFormOpen}>
-					Create a New Card
+				<Button block variant='primary' onClick={onCreateFormOpen}>
+					Create a New Photo
 				</Button>
 			</React.Fragment>
 		);
-
 	return (
 		<React.Fragment>
 			<Jumbotron>{render}</Jumbotron>
 			<PhotoModal
-				photo={props.updateFormPhoto}
-				show={props.updateFormPhoto !== null}
+				photo={updateFormPhoto}
+				show={updateFormPhoto !== null}
 				handleClose={props.onUpdateFormClose}
 				handleSubmit={props.onUpdateFormSubmit}
 			/>
 			<PhotoModal
-				show={props.createFormShow}
+				show={createFormShow}
 				handleClose={props.onCreateFormClose}
 				handleSubmit={props.onCreateFormSubmit}
 			/>

@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
 
-import JsonPlaceholder from '../../apis/JsonPlaceholder';
 import Presentation from './presentation';
+import {Dispatch, RootState} from "../../store/store";
+import { useDispatch, useSelector } from 'react-redux'
 
 const Photos = props => {
-	const [photos, setPhotos] = useState([]);
 	const [updateFormPhoto, setUpdateFormPhoto] = useState(null);
 	const [isUpdating, setIsUpdating] = useState(null);
 	const [createFormShow, setCreateFormShow] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(null);
-	const [isLoadingAlbum, setIsLoadingAlbum] = useState(false);
+
+	const photosState = useSelector((state: RootState) => state.photos)
+	const dispatch = useDispatch<Dispatch>()
 
 	useEffect(() => {
-		setIsLoadingAlbum(true);
-		JsonPlaceholder.get('/photos', {
-			params: { albumId: props.match.params.id },
-		}).then(res => {
-			console.groupCollapsed(`New Photos with Album Id : ${props.match.params.id}`);
-			console.log(res.data);
-			console.groupEnd();
-			setPhotos(res.data);
-			setIsLoadingAlbum(false);
-		});
+		// @ts-ignore
+		dispatch.photos.SET_IS_LOADING(true)
+		// @ts-ignore
+		dispatch.photos.getPhotosByAlbumId(props.match.params.id)
+		// @ts-ignore
+		dispatch.photos.SET_IS_LOADING(false)
 	}, [props.match.params.id]);
+
 
 	const createHandlers = {
 		onCreateFormOpen: () => {
@@ -35,21 +34,17 @@ const Photos = props => {
 
 		onCreateFormSubmit: formData => {
 			setCreateFormShow(false);
-			JsonPlaceholder.post('/photos', formData).then(({ data }) => {
-				setPhotos(prev => [...prev, data]);
-			});
+			// @ts-ignore
+			dispatch.photos.addPhoto(formData)
 		},
 	};
 
 	const deleteHandlers = {
 		onCardDelete: (delPhoto, index) => () => {
 			setIsDeleting(index);
-			JsonPlaceholder.delete(`/photos/${delPhoto.id}`).then(() => {
-				setPhotos(prevPhotos =>
-					prevPhotos.filter(photo => photo.id !== delPhoto.id)
-				);
-				setIsDeleting(null);
-			});
+			// @ts-ignore
+			dispatch.photos.deletePhoto(delPhoto.id)
+			setIsDeleting(null);
 		},
 	};
 
@@ -63,28 +58,22 @@ const Photos = props => {
 			setUpdateFormPhoto(null);
 			setIsUpdating(null);
 		},
-
 		onUpdateFormSubmit: formData => {
 			setUpdateFormPhoto(null);
-			JsonPlaceholder.patch(`/photos/${updateFormPhoto.id}`, formData).then(
-				({ data }) => {
-					setPhotos(prevPhotos =>
-						prevPhotos.map(photo => (photo.id === data.id ? data : photo))
-					);
-					setIsUpdating(null);
-				}
-			);
+			// @ts-ignore
+			dispatch.photos.updatePhoto({id: updateFormPhoto.id, formData})
+			setIsUpdating(null)
 		},
 	};
 
 	return (
 		<Presentation
-			photos={photos}
+			photos={photosState.photos}
 			updateFormPhoto={updateFormPhoto}
 			isUpdating={isUpdating}
 			createFormShow={createFormShow}
 			isDeleting={isDeleting}
-			isLoadingAlbum={isLoadingAlbum}
+			isLoadingAlbum={photosState.isLoading}
 			{...createHandlers}
 			{...deleteHandlers}
 			{...updateHandlers}

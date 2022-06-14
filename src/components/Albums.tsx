@@ -4,26 +4,23 @@ import Jumbotron from 'react-bootstrap/Jumbotron';
 import Table from 'react-bootstrap/Table';
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState, Dispatch } from '../store/store'
 
-import JsonPlaceholder from '../apis/JsonPlaceholder';
 
 const Albums = () => {
-	const [albums, setAlbums] = useState([]);
+	const albumsState = useSelector((state: RootState) => state.albums)
+	const dispatch = useDispatch<Dispatch>()
 
 	useEffect(() => {
-		JsonPlaceholder.get('/albums').then(res => {
-			console.groupCollapsed('New Albums');
-			console.log(res.data);
-			console.groupEnd();
-			setAlbums(res.data);
-		});
+		dispatch.albums.getAlbums()
 	}, []);
 
-	const mappedAlbum = albums.map(album => {
+	const mappedAlbum = albumsState.albums.map(album => {
 		return (
 			<tr key={album.id}>
 				<td className='text-center'>{album.id}</td>
-				<td className='text-center' colSpan='2'>
+				<td className='text-center' colSpan={2}>
 					{album.title}
 				</td>
 				<td className='text-center'>
@@ -37,7 +34,7 @@ const Albums = () => {
 
 	const emptyAlbum = (
 		<tr>
-			<td colSpan='4' className='text-center'>
+			<td colSpan={4} className='text-center'>
 				<Spinner variant='info' animation='grow' />
 			</td>
 		</tr>
@@ -49,7 +46,7 @@ const Albums = () => {
 				<thead>
 					<tr>
 						<th className='text-center'>#</th>
-						<th className='text-center' colSpan='2'>
+						<th className='text-center' colSpan={2}>
 							Album Name
 						</th>
 						<th className='text-center'>Go to</th>
